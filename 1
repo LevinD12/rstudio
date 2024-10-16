@@ -1,0 +1,24 @@
+# 表5,SMQ,吸2009-2018烟
+d_SMQ_F <- read.xport('SMQ_F.XPT') [,c("SEQN","SMQ020","SMD030","SMQ040","SMQ050Q","SMQ050U")] d_SMQ_G <- read.xport('SMQ_G.XPT') [,c("SEQN","SMQ020","SMD030","SMQ040","SMQ050Q","SMQ050U")] d_SMQ_H <- read.xport('SMQ_H.XPT') [,c("SEQN","SMQ020","SMD030","SMQ040","SMQ050Q","SMQ050U")] d_SMQ_I <- read.xport('SMQ_I.XPT') [,c("SEQN","SMQ020","SMD030","SMQ040","SMQ050Q","SMQ050U")] d_SMQ_J <- read.xport('SMQ_J.XPT') [,c("SEQN","SMQ020","SMD030","SMQ040","SMQ050Q","SMQ050U")]
+# 增加一列,年份
+d_SMQ_F$Year <- '2009-2010'
+d_SMQ_G$Year <- '2011-2012'
+d_SMQ_H$Year <- '2013-2014'
+d_SMQ_I$Year <- '2015-2016'
+d_SMQ_J$Year <- '2017-2018'
+# 合并数据
+d_SMQ <- bind_rows(d_SMQ_F, d_SMQ_G)
+d_SMQ <- bind_rows(d_SMQ, d_SMQ_H)
+d_SMQ <- bind_rows(d_SMQ, d_SMQ_I)
+d_SMQ <- bind_rows(d_SMQ, d_SMQ_J)
+# 列名变更
+d_SMQ <- plyr::rename(d_SMQ, c(SMQ020="smq020", SMD030="smd030", SMQ040="smq040",
+                               SMQ050Q="smq050q", SMQ050U="smq050u"))
+# 判断吸烟的标准,满足条件之一:
+# (1) 抽烟超过100,smq020=='1'
+# (2) 抽烟不超过100,但目前在抽烟,每天或者偶尔抽。
+# (3) !上述数据可能部分准确,可进一步完善。
+d_SMQ$smoke <- ifelse(d_SMQ$smq020 %in% c('1') | d_SMQ$smq040 %in% c('1','2'),
+"yes", "no")
+# 删除列,smq020,smd030,smq040,smq050q,smq050u
+d_SMQ <- subset(d_SMQ,select = -c(smq020,smd030,smq040,smq050q,smq050u))
